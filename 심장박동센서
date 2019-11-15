@@ -40,7 +40,7 @@ void loop(){
   }
      
   ledFadeToBeat();                      // Makes the LED Fade Effect Happen 
-  delay(1000);                             //  take a break
+  delay(1000);                             //  take a break // if you want more slowly, you can change it to a large number (c1hong)
 }
  
 void ledFadeToBeat(){
