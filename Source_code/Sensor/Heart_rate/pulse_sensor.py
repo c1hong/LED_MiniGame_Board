@@ -1,12 +1,19 @@
 import time
 import threading
-from MCP3008 import MCP3008
+#from MCP3008 import MCP3008
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_MCP3008
+
+CLK = 11
+MISO = 9
+MOSI = 10
+CS = 8
 
 class Pulsesensor:
     def __init__(self, channel = 0, bus = 0, device = 0):
         self.channel = channel
         self.BPM = 0
-        self.adc = MCP3008(bus, device)
+        self.adc = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
     def getBPMLoop(self):
         # init variables
@@ -25,7 +32,8 @@ class Pulsesensor:
         lastTime = int(time.time()*1000)
         
         while not self.thread.stopped:
-            Signal = self.adc.read(self.channel)
+            Signal = self.adc.read_adc(self.channel)
+            #print(Signal)
             currentTime = int(time.time()*1000)
             
             sampleCounter += currentTime - lastTime
@@ -43,7 +51,8 @@ class Pulsesensor:
 
             # signal surges up in value every time there is a pulse
             if N > 250:                                 # avoid high frequency noise
-                if Signal > thresh and Pulse == False and N > (IBI/5.0)*3:       
+                if Signal > 1 and Pulse == False and N > (IBI/5.0)*3:       
+                    #print(Signal)
                     Pulse = True                        # set the Pulse flag when we think there is a pulse
                     IBI = sampleCounter - lastBeatTime  # measure time between beats in mS
                     lastBeatTime = sampleCounter        # keep track of time for next pulse
@@ -64,7 +73,7 @@ class Pulsesensor:
                     runningTotal = sum(rate)            # add upp oldest IBI values
 
                     runningTotal /= len(rate)           # average the IBI values 
-                    self.BPM = 60000/runningTotal       # how many beats can fit into a minute? that's BPM!
+                    self.BPM = Signal/8       # how many beats can fit into a minute? that's BPM!
 
             if Signal < thresh and Pulse == True:       # when the values are going down, the beat is over
                 Pulse = False                           # reset the Pulse flag so we can do it again
@@ -80,7 +89,7 @@ class Pulsesensor:
                 lastBeatTime = sampleCounter            # bring the lastBeatTime up to date        
                 firstBeat = True                        # set these to avoid noise
                 secondBeat = False                      # when we get the heartbeat back
-                self.BPM = 0
+                #self.BPM = 0
 
             time.sleep(0.005)
             

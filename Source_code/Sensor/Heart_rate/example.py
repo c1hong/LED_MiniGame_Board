@@ -1,4 +1,4 @@
-from pulsesensor import Pulsesensor
+from pulse_sensor import Pulsesensor
 import time
 
 p = Pulsesensor()
@@ -14,3 +14,4 @@ try:
         time.sleep(1)
 except:
     p.stopAsyncBPM()
+o
