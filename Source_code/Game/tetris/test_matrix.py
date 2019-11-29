@@ -26,9 +26,9 @@ class MyMatrix(Matrix):
         for y in range(self._dy):
             for x in range(self._dx):
                 if self._array[y][x] == 0:
-                    print("□", end='')
+                    set_pixel(x, y, 2)
                 elif self._array[y][x] == 1:
-                    print("■", end='')
+                    set_pixel(x,y,3)
                 else:
                     print("XX", end='')
             print()

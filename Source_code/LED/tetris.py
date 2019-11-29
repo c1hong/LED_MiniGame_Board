@@ -1,20 +1,44 @@
 from matrix import *
-import tetris_led_display as tld # added by cwhong on 20191129
+import LED_display as TLD # added by cwhong on 20191129
 import random
+import threading
+import keyboard
+import time
+
+class Key :
+
+    def __init__(self) :
+        self.key = ''
+    
+    def key_input(self, e) :
+        for code in keyboard._pressed_events :
+            if code == 17 :
+                self.key = 'w'
+            elif code == 31 :
+                self.key = 's'
+            elif code == 30 :
+                self.key = 'a'
+            elif code == 32 :
+                self.key = 'd'
+            elif code == 16 :
+                self.key = 'q'
+            elif code == 57 :
+                self.key = ' '
+
 def draw_matrix(m): # modified by cwhong on 20191129
     array = m.get_array()
     for y in range(m.get_dy()-4):
         for x in range(4,m.get_dx()-4):
             if array[y][x] == 0:
                # print("0", end='')
+                TLD.set_pixel(y,19-x,0)
                 continue
             elif array[y][x] == 1:
                # print("1", end='')
-                 tld.set_pixel(16-x,32-y,7)
+                TLD.set_pixel(y,19-x,4)
             else:
                # print("XX", end='')
-                 continue
-        print()
+                continue
 
 
 ###
@@ -100,34 +124,42 @@ arrayScreen = [
 
 ###
 ### prepare the initial screen output
-###  
+###
+
+t=threading.Thread(target=TLD.main, args=())
+t.setDaemon(True)
+t.start()
+
 iScreen = Matrix(arrayScreen)
 oScreen = Matrix(iScreen)
 currBlk = Matrix(arrayBlk[h][i])
 tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
 tempBlk = tempBlk + currBlk
 oScreen.paste(tempBlk, top, left)
-draw_matrix(oScreen); print()
+draw_matrix(oScreen);
 
 ###
 ### execute the loop
 ###
 
+K = Key()
 while True:
-    key = input('Enter a key from [ q (quit), a (left), d (right), s (down), w (rotate), \' \' (drop) ] : ')
-    if key == 'q':
+    K.key = ''
+    time.sleep(0.2)
+    keyboard.hook(K.key_input)
+    if K.key == 'q':
         print('Game terminated...')
         break
-    elif key == 'a': # move left
+    elif K.key == 'a': # move left
         left -= 1
-    elif key == 'd': # move right
+    elif K.key == 'd': # move right
         left += 1
-    elif key == 's': # move down
+    elif K.key == 's': # move down
         top += 1
-    elif key == 'w': # rotate the block clockwise
+    elif K.key == 'w': # rotate the block clockwise
         i=(i+1)%4
         currBlk=Matrix(arrayBlk[h][i])
-    elif key == ' ': # drop the block
+    elif K.key == ' ': # drop the block
         while not tempBlk.anyGreaterThan(1):
             top+=1
             tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
@@ -135,25 +167,21 @@ while True:
             if tempBlk.anyGreaterThan(1):
                 top-=1
                 newBlockNeeded = True
-            
-    else:
-        print('Wrong key!!!')
-        continue
 
     tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
     tempBlk = tempBlk + currBlk
     if tempBlk.anyGreaterThan(1):
-        if key == 'a': # undo: move right
+        if K.key == 'a': # undo: move right
             left += 1
-        elif key == 'd': # undo: move left
+        elif K.key == 'd': # undo: move left
             left -= 1
-        elif key == 's': # undo: move up
+        elif K.key == 's': # undo: move up
             top -= 1
             newBlockNeeded = True
-        elif key == 'w': # undo: rotate the block counter-clockwise
+        elif K.key == 'w': # undo: rotate the block counter-clockwise
             i = (i-1)%4
             currBlk = Matrix(arrayBlk[h][i])
-        elif key == ' ': # undo: move up
+        elif K.key == ' ': # undo: move up
             print('Not implemented')
 
         tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
@@ -161,7 +189,7 @@ while True:
 
     oScreen = Matrix(iScreen)
     oScreen.paste(tempBlk, top, left)
-    draw_matrix(oScreen); print()
+    draw_matrix(oScreen);
 
     if newBlockNeeded:
         iScreen = Matrix(oScreen)
@@ -179,8 +207,14 @@ while True:
         
         oScreen = Matrix(iScreen)
         oScreen.paste(tempBlk, top, left)
-        draw_matrix(oScreen); print()
-        
+        draw_matrix(oScreen);
+    
+    top += 1
+    tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
+    tempBlk = tempBlk + currBlk
+    if tempBlk.anyGreaterThan(1):
+        top-=1
+        newBlockNeeded = True
 ###
 ### end of the loop
 ###
