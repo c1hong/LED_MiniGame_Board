@@ -73,7 +73,7 @@ class Pulsesensor:
                     runningTotal = sum(rate)            # add upp oldest IBI values
 
                     runningTotal /= len(rate)           # average the IBI values 
-                    self.BPM = Signal/8       # how many beats can fit into a minute? that's BPM!
+                    self.BPM = Signal/6       # how many beats can fit into a minute? that's BPM!
 
             if Signal < thresh and Pulse == True:       # when the values are going down, the beat is over
                 Pulse = False                           # reset the Pulse flag so we can do it again
