@@ -31,6 +31,7 @@ Example usage:
 import time
 import re
 import sys
+import os
 
 # uses result_end_time currently only avaialble in v1p1beta, will be in v1 soon
 from google.cloud import speech_v1p1beta1 as speech
@@ -38,8 +39,8 @@ import pyaudio
 from six.moves import queue
 
 # Audio recording parameters
-STREAMING_LIMIT = 10000
-SAMPLE_RATE = 16000
+STREAMING_LIMIT = 1000000
+SAMPLE_RATE = 44100
 CHUNK_SIZE = int(SAMPLE_RATE / 10)  # 100ms
 
 RED = '\033[0;31m'
@@ -221,7 +222,11 @@ def listen_print_loop(responses, stream):
 
             # Exit recognition if any of the transcribed phrases could be
             # one of our keywords.
-            if re.search(r'\b(exit|quit)\b', transcript, re.I):
+            if re.search(r'\b(snake|Snake)\b', transcript, re.I) :
+                os.system('sudo python3 snake.py')
+            elif re.search(r'\b(tetris|Tetris)\b', transcript, re.I) :
+                os.system('sudo python3 tetris.py')
+            elif re.search(r'\b(exit|quit)\b', transcript, re.I):
                 sys.stdout.write(YELLOW)
                 sys.stdout.write('Exiting...\n')
                 stream.closed = True
@@ -242,7 +247,7 @@ def main():
     config = speech.types.RecognitionConfig(
         encoding=speech.enums.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=SAMPLE_RATE,
-        language_code='en-US',
+        language_code='en-UK',
         max_alternatives=1)
     streaming_config = speech.types.StreamingRecognitionConfig(
         config=config,

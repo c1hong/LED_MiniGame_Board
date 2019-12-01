@@ -40,7 +40,7 @@ from six.moves import queue
 
 # Audio recording parameters
 STREAMING_LIMIT = 290000
-SAMPLE_RATE = 16000
+SAMPLE_RATE = 44100
 CHUNK_SIZE = int(SAMPLE_RATE / 10)  # 100ms
 
 
