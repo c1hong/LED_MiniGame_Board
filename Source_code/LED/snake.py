@@ -23,7 +23,7 @@ class Snake :
         x, y = self.pos[-1]
         head = self.dir
         W_x, W_y = self.WAY[head]
-        if not 0 < x+W_x < self.N-1 or not 0 < y+W_y < self.M-1 :
+        if not 0 <= x+W_x <= self.N-1 or not 0 <= y+W_y <= self.M-1 :
             raise Exception
         elif (x+W_x, y+W_y) in self.pos :
             raise Exception
@@ -32,25 +32,25 @@ class Snake :
 
     def change_head(self, e) :
         for code in kbd._pressed_events :
-            if (code == 17 or code == 72) and self.dir != 3:
-                self.dir = 4
-            elif (code == 31 or code == 80) and self.dir != 4:
-                self.dir = 3
-            elif (code == 30 or code == 75) and self.dir != 1:
-                self.dir = 2
-            elif (code == 32 or code == 77) and self.dir != 2:
+            if (code == 17 or code == 72) and self.dir != 2:
                 self.dir = 1
+            elif (code == 31 or code == 80) and self.dir != 1:
+                self.dir = 2
+            elif (code == 30 or code == 75) and self.dir != 3:
+                self.dir = 4
+            elif (code == 32 or code == 77) and self.dir != 4:
+                self.dir = 3
 
 class Food() :
     def __init__(self) :
         self.pos = []
 
-    def thread_food(self) :
-        while True :
-            (x, y) = ((rd.randint(0, 31), rd.randint(0, 15)))
-            if not self.chk_food((x, y)) :
-                self.set_food((x, y))
-            time.sleep(10)
+#   def thread_food(self) :
+#       while True :
+#           (x, y) = ((rd.randint(0, 31), rd.randint(0, 15)))
+#           if not self.chk_food((x, y)) :
+#               self.set_food((x, y))
+#           time.sleep(10)
 
     def set_food(self, rd_pos) :
         self.pos.append(rd_pos)
@@ -78,12 +78,15 @@ class Map :
         for i in range(self.snake.N) :
             for j in range(self.snake.M) :
                 color = -1
-                if i % (self.snake.N-1) == 0 or j % (self.snake.M-1) == 0 :
-                    color = 0
-                elif (i, j) == self.snake.pos[-1] :
+               #if i % (self.snake.N-1) == 0 or j % (self.snake.M-1) == 0 :
+               #    color = 0
+                if (i, j) == self.snake.pos[-1] :
                     color = 1
                     if self.food.chk_food((i, j)) :
+                        score += 5000
                         self.snake.pos.insert(0, self.snake.bodypart)
+                        if(len(self.snake.pos)%5==0) :
+                            self.place_food()
                         self.food.remove_food((i, j))
                         self.place_food()
                 elif (i, j) in self.snake.pos :
@@ -99,13 +102,15 @@ class Map :
 
 if __name__ == '__main__' :
     
+    user = 'SeungMin'
     S = Snake()
     M = Map(S)
     M.place_food()
-#    t = threading.Thread(target=M.food.thread_food, args=())
-#    t.setDaemon(True)
-#    t.start()
+#   t = threading.Thread(target=M.food.thread_food, args=())
+#   t.setDaemon(True)
+#   t.start()
 
+    score = 0
     t=threading.Thread(target=LD.main, args=())
     t.setDaemon(True)
     t.start()
@@ -115,11 +120,10 @@ if __name__ == '__main__' :
             S.add_body()
             kbd.hook(S.change_head)
             M.fill_map()
-            if len(M.food.pos) == 0 :
-                M.place_food()
-            time.sleep(0.05)
+            score += 100
+            time.sleep(0.1)
             os.system('cls' if os.name == 'nt' else 'clear')
     except :
         os.system('cls' if os.name == 'nt' else 'clear')
         filename = os.path.basename(__file__).replace('.py', '')
-        #end(filename) 
+        end(filename, user, score) 

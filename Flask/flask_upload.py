@@ -5,7 +5,8 @@ import os
 app = Flask(__name__)
 
 ROOT_APP = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(ROOT_APP, 'uploads')
+UPLOAD_FOLDER = './uploads'
+#UPLOAD_FOLDER = os.path.join(ROOiT_APP, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -21,10 +22,10 @@ def upload_file() :
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         return redirect(url_for('render_file')) 
 
-@app.route('/GetUserPhoto/<path:filename>')
+@app.route('/GetUserData/<path:filename>')
 def download(filename) :
     try :
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename=filename, mimetype='image/jpeg', as_attachment=True)
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename=filename, mimetype='image/jpg', as_attachment=True)
     except FileNotFoundError :
         abort(404)
 
